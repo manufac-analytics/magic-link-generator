@@ -29,12 +29,20 @@ A sleek, production-ready **Next.js** application that enables secure user submi
 
 ---
 
+## 🔄 How It Works
+
+1. **Submission**: User submits the form with their details and email.
+2. **Verification**: The system creates a pending submission and sends a magic link to the user's email.
+3. **Confirmation**: User clicks the link, creating a confirmed session/status, ensuring the email is valid.
+
+---
+
 ## 🛠️ Getting Started
 
 ### 1. Prerequisites
 
 Ensure you have the following installed:
-- **Node.js**: `v18.0.0` or higher
+- **Node.js**: `v18.18.0` or higher
 - **PostgreSQL**: Running instance (Local or Cloud like Neon/Supabase. Both will work)
 - **npm**
 
@@ -85,6 +93,27 @@ The project uses **Prisma** as the ORM. Follow these steps to set up your Postgr
    npx prisma studio
    ```
 
+### Option B: Local Setup using Docker (Recommended)
+
+If you want to run the database locally without setting up a cloud provider:
+
+1. **Start Database**:
+   ```bash
+   docker-compose up -d
+   ```
+   This will start a PostgreSQL instance on port `5432`.
+
+2. **Configure `.env`**:
+   Ensure your `DATABASE_URL` matches the Docker credentials:
+   ```env
+   DATABASE_URL="postgresql://postgres:ayushManufac123@localhost:5432/magic_link"
+   ```
+
+3. **Initialize Database**:
+   ```bash
+   npx prisma migrate dev --name init
+   ```
+
 ---
 
 ## 📧 Resend Configuration
@@ -113,8 +142,10 @@ The application will be available at `http://localhost:3000`.
 
 ### Project Structure (Key Folders)
 
+- `/app/api`: Backend API routes handling submissions and confirmation logic.
+- `/app/confirm`: Page for token verification and confirmation.
+- `/app/schemas`: Zod validation schemas used across client and server.
 - `/app/submission`: Contains the user input form.
-- `/app/confirm`: Logic for token verification and confirmation.
 - `/emails`: React-based email templates using [react-email](https://react.email/).
 - `/lib`: Reusable services, Prisma client, and email utility.
 - `/prisma`: Database schema definition.
@@ -133,4 +164,3 @@ The application will be available at `http://localhost:3000`.
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
 ---
-
