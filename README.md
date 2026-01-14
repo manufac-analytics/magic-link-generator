@@ -78,22 +78,25 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 The project uses **Prisma** as the ORM. Follow these steps to set up your PostgreSQL database:
 
-1. **Initialize Migration**: Create the database tables based on the schema.
-   ```bash
-   npx prisma migrate dev --name init
-   ```
+### Option A: Cloud Setup using Neon.tech (Recommended for Production)
 
-2. **Generate Client**: Ensure the Prisma Client is up to date.
-   ```bash
-   npx prisma generate
-   ```
+1.  **Sign Up**: Create a free account at [Neon.tech](https://neon.tech/).
+2.  **Create Project**: Create a new project and database instance.
+3.  **Get Connection String**: 
+    - In the Neon console, go to the **Dashboard**.
+    - Copy the **Connection Details** (ensure it's the `Connection String` format).
+    - It should look like: `postgresql://[user]:[password]@[neon-host]/[dbname]?sslmode=require`.
+4.  **Configure `.env`**:
+    - Paste the connection string into your `.env` file:
+      ```env
+      DATABASE_URL="postgresql://user:password@ep-shiny-glade-123456.us-east-2.aws.neon.tech/neondb?sslmode=require"
+      ```
+5.  **Initialize Database**:
+    ```bash
+    npx prisma migrate dev --name init
+    ```
 
-3. **Database GUI** (Optional): View your data in a browser.
-   ```bash
-   npx prisma studio
-   ```
-
-### Option B: Local Setup using Docker (Recommended)
+### Option B: Local Setup using Docker (Recommended for Development)
 
 If you want to run the database locally without setting up a cloud provider:
 
