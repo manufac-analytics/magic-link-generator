@@ -1,11 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { hashToken } from "@/lib/token";
-import {Center, Card, Title, Text, Stack, Button, ThemeIcon} from "@mantine/core";
-import { IconCircleCheck, IconAlertTriangle } from "@tabler/icons-react";
+import { Center, Card, Title, Text, Stack, Button, ThemeIcon } from "@mantine/core";
+import { IconAlertTriangle } from "@tabler/icons-react";
 import Link from "next/link";
+import SuccessUI from "./SuccessUI";
+import AutoConfirm from "./AutoConfirm";
 
 interface PageProps {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token: string }>;
 }
 
 export default async function ConfirmPage({ searchParams }: PageProps) {
@@ -41,11 +43,7 @@ export default async function ConfirmPage({ searchParams }: PageProps) {
     include: { submission: true },
   });
 
-  if (
-    !magicLinkToken ||
-    magicLinkToken.usedAt ||
-    magicLinkToken.expiresAt < new Date()
-  ) {
+  if (!magicLinkToken || magicLinkToken.expiresAt < new Date()) {
     return (
       <Center h="100vh" px="md">
         <Card shadow="md" radius="md" p="xl" maw={420} w="100%">
@@ -56,7 +54,7 @@ export default async function ConfirmPage({ searchParams }: PageProps) {
 
             <Title order={3}>Link expired</Title>
             <Text c="dimmed" ta="center">
-              This magic link has already been used or expired.
+              This magic link is invalid or has expired.
             </Text>
 
             <Link href="/submission">
@@ -68,54 +66,13 @@ export default async function ConfirmPage({ searchParams }: PageProps) {
     );
   }
 
-  await prisma.$transaction([
-    prisma.magicLinkToken.update({
-      where: { id: magicLinkToken.id },
-      data: { usedAt: new Date() },
-    }),
-    prisma.submission.update({
-      where: { id: magicLinkToken.submission.id },
-      data: { status: "CONFIRMED" },
-    }),
-  ]);
+  // If the token has already been used, show the success UI
+  if (magicLinkToken.usedAt) {
+    return <SuccessUI submission={magicLinkToken.submission} alreadyVerified={true} />;
+  }
 
-  return (
-    <Center h="100vh" px="md">
-      <Card shadow="md" radius="md" p="xl" maw={480} w="100%">
-        <Stack align="center">
-          <ThemeIcon color="green" size={64} radius="xl">
-            <IconCircleCheck size={36} />
-          </ThemeIcon>
 
-          <Title order={2}>Submission confirmed</Title>
-
-          <Text ta="center">
-            Thank you,{" "}
-            <strong>{magicLinkToken.submission.name}</strong>. Your email has
-            been verified successfully.
-          </Text>
-          <Text ta="center"> 
-            Company:{" "}
-            <strong>{magicLinkToken.submission.companyName}</strong>
-          </Text>
-          <Text ta="center">
-            LinkedIn:{" "}
-            <strong>{magicLinkToken.submission.linkedinUrl}</strong>
-          </Text>
-          {magicLinkToken.submission.documentName && (
-            <Text size="sm" c="dimmed">
-              Document:{" "}
-              <strong>{magicLinkToken.submission.documentName}</strong>
-            </Text>
-          )}
-
-          <Link href="/submission">
-            <Button mt="lg" variant="light">
-              Submit another response
-            </Button>
-          </Link>
-        </Stack>
-      </Card>
-    </Center>
-  );
+  // Token is valid and NOT used yet - Render AutoConfirm component to handle confirmation via API
+  return <AutoConfirm token={token} submission={magicLinkToken.submission} />;
 }
+
